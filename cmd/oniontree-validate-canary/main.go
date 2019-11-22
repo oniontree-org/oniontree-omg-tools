@@ -26,6 +26,7 @@ func main() {
 	id := flag.String("id", "", "Onion service ID")
 	timeout := flag.Duration("timeout", 30*time.Second, "HTTP request timeout")
 	verifySig := flag.Bool("verify-signature", true, "Enable signature verification")
+	dateOnly := flag.Bool("date-only", false, "Skip message validation, check date only")
 	flag.Parse()
 
 	if *id == "" {
@@ -68,17 +69,25 @@ func main() {
 	})
 
 	now := time.Now()
+	checked := 0
+	exitCode := 0
 	for _, url := range s.URLs {
 		msg, err := c.GetCanaryMessage(url)
 		if err != nil {
-			goto printlog
+			continue
 		}
+		checked++
 		if *verifySig {
 			if _, err = msg.VerifySignature(entities); err != nil {
 				goto printlog
 			}
 		}
-		if err = msg.Validate(now); err != nil {
+		if *dateOnly {
+			err = msg.IsValidDate(now)
+		} else {
+			err = msg.Validate(now)
+		}
+		if err != nil {
 			goto printlog
 		}
 	printlog:
@@ -88,7 +97,14 @@ func main() {
 			} else {
 				err = errors.New("valid canary, but message signature not verified!")
 			}
+		} else {
+			exitCode = 1
 		}
 		log.Printf("%s: %s", url, err)
 	}
+	if checked == 0 {
+		exitCode = 1
+		log.Println("No check performed, all mirrors are most likely down.")
+	}
+	os.Exit(exitCode)
 }

@@ -6,6 +6,8 @@ Validate host's `/canary.txt`.
 
 ```
 Usage of oniontree-validate-canary:
+  -date-only
+    	Skip message validation, check date only
   -id string
     	Onion service ID
   -timeout duration
