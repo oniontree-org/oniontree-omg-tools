@@ -76,7 +76,7 @@ func main() {
 			goto printlog
 		}
 		if *verifySig {
-			if _, err := msg.VerifySignature(entities); err != nil {
+			if _, err = msg.VerifySignature(entities); err != nil {
 				goto printlog
 			}
 		}
