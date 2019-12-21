@@ -89,6 +89,10 @@ func main() {
 			err = errors.New("no mirrors found")
 			goto printlog
 		}
+		if !isNewLink(s.URLs, urls) {
+			err = errors.New("no new mirrors found")
+			goto printlog
+		}
 		changed = true
 		if *replace {
 			s.SetURLs(urls...)
@@ -120,3 +124,19 @@ func filterOnionMirrors(urls []string) []string {
 	return filtered
 }
 
+// isNewLink check if there's a new link.
+func isNewLink(oldUrls []string, newUrls []string) bool {
+	for _, url := range newUrls {
+		found := false
+		for idx, _ := range oldUrls {
+			if url == oldUrls[idx] {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return true
+		}
+	}
+	return false
+}
