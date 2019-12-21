@@ -84,6 +84,7 @@ func main() {
 		if err != nil {
 			goto printlog
 		}
+		urls = filterOnionMirrors(urls)
 		if len(urls) == 0 {
 			err = errors.New("no mirrors found")
 			goto printlog
@@ -107,3 +108,15 @@ func main() {
 		}
 	}
 }
+
+func filterOnionMirrors(urls []string) []string {
+	filtered := []string{}
+	for _, url := range urls {
+		switch {
+		case strings.HasSuffix(url, ".onion"), strings.HasSuffix(url, ".onion/"):
+			filtered = append(filtered, url)
+		}
+	}
+	return filtered
+}
+
